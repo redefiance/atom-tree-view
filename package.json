@@ -1,0 +1,15 @@
+{
+  "name": "atom-tree-view",
+  "version": "0.0.0",
+  "main": "./lib/main",
+  "description": "A tree view template based on SpacePen Views",
+  "repository": "https://github.com/redefiance/atom-tree-view",
+  "license": "MIT",
+  "engines": {
+    "atom": "*"
+  },
+  "private": true,
+  "dependencies": {
+    "atom-space-pen-views": "^2.0.0"
+  }
+}

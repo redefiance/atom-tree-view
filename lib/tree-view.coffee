@@ -1,19 +1,3 @@
-createEntries = ->
-  entries = []
-  addEntry = (arr, depth)->
-    entry =
-      title: Math.random()
-      icon: 'icon-file-directory'
-    n = Math.floor(Math.random() * 3)
-    if n > 0 and depth < 4
-      entry.children = []
-      for i in [1..n]
-        addEntry(entry.children, depth+1)
-    arr.push entry
-  for i in [1..3]
-    addEntry(entries, 0)
-  entries
-
 {$, View} = require 'atom-space-pen-views'
 TreeItemView = require './tree-item-view'
 
@@ -21,9 +5,17 @@ module.exports =
 class TreeView extends View
   @content: ->
     @div =>
-      @ol class: 'full-menu list-tree has-collapsable-children focusable-panel', tabindex: -1, outlet: 'list'
+      @ol tabindex: -1, outlet: 'list'
 
   initialize: ->
+    @list.addClass 'list-tree has-collapsable-children focusable-panel'
+    @list.css
+      'padding-left': '10px'
+      'user-select': 'none'
+      '-moz-user-select': 'none'
+      '-khtml-user-select': 'none'
+      '-webkit-user-select': 'none'
+
     @on 'click', '.entry', (e) => @entryClicked(e)
 
     atom.commands.add @element,
@@ -33,12 +25,13 @@ class TreeView extends View
      'core:move-right': => @expandEntry()
      'core:page-up': => @pageUp()
      'core:page-down': => @pageDown()
+     'core:confirm': => @confirm()
      'tool-panel:unfocus': => @unfocus()
 
-    for entry in createEntries()
-      view = new TreeItemView
-      view.initialize(entry)
-      @list[0].appendChild view
+  addItem: (item)->
+    view = new TreeItemView
+    view.initialize(item)
+    @list[0].appendChild view
 
   focus: ->
     @list.focus()
@@ -87,6 +80,11 @@ class TreeView extends View
   expandEntry: ->
     @list.find('.selected.list-nested-item.collapsed')[0]?.expand()
 
+  confirm: ->
+    selected = $('.selected')
+    selected[0].toggleExpansion() if selected.is('.list-nested-item')
+    selected[0].item.confirm?()
+
   collapseEntry: ->
     selected = @list.find('.selected')
     if selected.is('.list-nested-item.expanded')
@@ -99,23 +97,23 @@ class TreeView extends View
   entryClicked: (e) ->
     entry = e.currentTarget
     @selectEntry(entry)
-    if $(entry).is('.list-nested-item')
-      entry.toggleExpansion()
+    @confirm()
     false
 
   selectEntry: (entry) ->
     return unless entry?
     @list.find('.selected').removeClass 'selected'
     entry.classList.add('selected')
+    @scrollTo entry
 
+  scrollTo: (entry)->
     displayElement = $(entry.header)
+    scroller = @list.offsetParent()
 
-    top = displayElement.position().top
-    bottom = top + displayElement.outerHeight()
-
-    scroller = @list.parentsUntil(@list.offsetParent()).last()
-
-    if bottom > scroller.scrollBottom()
-      scroller.scrollBottom(bottom)
+    top = displayElement.position().top + scroller.scrollTop()
     if top < scroller.scrollTop()
-      scroller.scrollTop(top)
+      scroller.scrollTop top
+
+    bot = top + displayElement.outerHeight()
+    if bot > scroller.scrollBottom()
+      scroller.scrollTop bot-scroller.height()

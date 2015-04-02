@@ -1,5 +1,6 @@
 {$, View} = require 'atom-space-pen-views'
 TreeItemView = require './tree-item-view'
+TreeItemView2 = require './tree-item-view2'
 
 module.exports =
 class TreeView extends View
@@ -29,9 +30,13 @@ class TreeView extends View
      'tool-panel:unfocus': => @unfocus()
 
   addItem: (item)->
-    view = new TreeItemView
-    view.initialize(item)
-    @list[0].appendChild view
+    @list.append new TreeItemView2 item
+    # li = $('<li>')
+    # li.append new TreeItemView2 item
+    # @list.append li
+    # view = new TreeItemView
+    # view.initialize(item)
+    # @list[0].appendChild view
 
   focus: ->
     @list.focus()
@@ -40,7 +45,7 @@ class TreeView extends View
     atom.workspace.getActivePane().activate()
 
   moveDown: ->
-    current = @list.find('.selected')
+    current = @selectedEntry()
 
     if not current?
       return @selectEntry list.find('.entry')?[0]
@@ -55,7 +60,7 @@ class TreeView extends View
     @selectEntry next[0] if next[0]?
 
   moveUp: ->
-    current = @list.find('.selected')
+    current = @selectedEntry()
 
     if not current?
       return @selectEntry list.find('.entry').last()?[0]
@@ -70,23 +75,25 @@ class TreeView extends View
     @selectEntry prev[0]
 
   pageUp: ->
-    current = @list.find('.selected')
+    current = @selectedEntry()
     @selectEntry current.prev('.entry')[0]
 
   pageDown: ->
-    current = @list.find('.selected')
+    current = @selectedEntry()
     @selectEntry current.next('.entry')[0]
 
   expandEntry: ->
     @list.find('.selected.list-nested-item.collapsed')[0]?.expand()
 
   confirm: ->
-    selected = $('.selected')
+    selected = @selectedEntry()
+    console.log selected[0]
+    console.log selected.is('.list-nested-item')
     selected[0].toggleExpansion() if selected.is('.list-nested-item')
     selected[0].item.confirm?()
 
   collapseEntry: ->
-    selected = @list.find('.selected')
+    selected = @selectedEntry()
     if selected.is('.list-nested-item.expanded')
       selected[0].collapse()
     else
@@ -100,14 +107,17 @@ class TreeView extends View
     @confirm()
     false
 
+  selectedEntry: ->
+    @list.find('.selected')
+
   selectEntry: (entry) ->
     return unless entry?
-    @list.find('.selected').removeClass 'selected'
+    @selectedEntry().removeClass 'selected'
     entry.classList.add('selected')
     @scrollTo entry
 
   scrollTo: (entry)->
-    displayElement = $(entry.header)
+    displayElement = $(entry)
     scroller = @list.offsetParent()
 
     top = displayElement.position().top + scroller.scrollTop()

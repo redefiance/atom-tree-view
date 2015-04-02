@@ -1,129 +1,89 @@
-{$, View} = require 'atom-space-pen-views'
-TreeItemView = require './tree-item-view'
-TreeItemView2 = require './tree-item-view2'
+{$, View} = require 'space-pen'
+TreeEntryView = require './tree-entry-view'
 
 module.exports =
 class TreeView extends View
   @content: ->
-    @div =>
-      @ol tabindex: -1, outlet: 'list'
+    @ol class: 'list-tree has-collapsable-children focusable-panel', tabindex: -1
 
   initialize: ->
-    @list.addClass 'list-tree has-collapsable-children focusable-panel'
-    @list.css
-      'padding-left': '10px'
-      'user-select': 'none'
-      '-moz-user-select': 'none'
-      '-khtml-user-select': 'none'
-      '-webkit-user-select': 'none'
-
-    @on 'click', '.entry', (e) => @entryClicked(e)
-
+    @css
+      'padding-left':         '10px'
+      'user-select':          'none'
+      '-moz-user-select':     'none'
+      '-khtml-user-select':   'none'
+      '-webkit-user-select':  'none'
     atom.commands.add @element,
-     'core:move-up': => @moveUp()
-     'core:move-down': => @moveDown()
-     'core:move-left': => @collapseEntry()
-     'core:move-right': => @expandEntry()
-     'core:page-up': => @pageUp()
-     'core:page-down': => @pageDown()
-     'core:confirm': => @confirm()
-     'tool-panel:unfocus': => @unfocus()
+      'core:move-left':  => @collapse()
+      'core:move-right': => @expand()
+      'core:move-down':  => @moveDown()
+      'core:move-up':    => @moveUp()
+      'core:page-down':  => @pageDown()
+      'core:page-up':    => @pageUp()
+      'core:confirm':    => @confirm()
 
-  addItem: (item)->
-    @list.append new TreeItemView2 item
-    # li = $('<li>')
-    # li.append new TreeItemView2 item
-    # @list.append li
-    # view = new TreeItemView
-    # view.initialize(item)
-    # @list[0].appendChild view
+    @on 'click', '.entry', (e)=>
+      @select $(e.target).view()
+      @confirm()
 
-  focus: ->
-    @list.focus()
-
-  unfocus: ->
-    atom.workspace.getActivePane().activate()
-
-  moveDown: ->
-    current = @selectedEntry()
-
-    if not current?
-      return @selectEntry list.find('.entry')?[0]
-
-    if current.is('.expanded')
-      return @selectEntry current.find('.entry')[0]
-
-    next = current.next('.entry')
-    while current?[0] and not next?[0]
-      current = current.parents('.entry').first()
-      next = current.next('.entry')
-    @selectEntry next[0] if next[0]?
-
-  moveUp: ->
-    current = @selectedEntry()
-
-    if not current?
-      return @selectEntry list.find('.entry').last()?[0]
-
-    prev = current.prev('.entry')
-    if not prev?[0]
-      return @selectEntry current.parents('.entry').first()?[0]
-
-    if prev.is('.expanded')
-      return @selectEntry prev.find('.entry:not(:hidden)').last()[0]
-
-    @selectEntry prev[0]
-
-  pageUp: ->
-    current = @selectedEntry()
-    @selectEntry current.prev('.entry')[0]
-
-  pageDown: ->
-    current = @selectedEntry()
-    @selectEntry current.next('.entry')[0]
-
-  expandEntry: ->
-    @list.find('.selected.list-nested-item.collapsed')[0]?.expand()
+  addEntry: (entry)->
+    @append entry
+    @select entry unless @selected?
 
   confirm: ->
-    selected = @selectedEntry()
-    console.log selected[0]
-    console.log selected.is('.list-nested-item')
-    selected[0].toggleExpansion() if selected.is('.list-nested-item')
-    selected[0].item.confirm?()
+    return @collapse() if @selected.is('.expanded')
+    return @expand() if @selected.is('.collapsed')
+    @selected.confirm()
 
-  collapseEntry: ->
-    selected = @selectedEntry()
-    if selected.is('.list-nested-item.expanded')
-      selected[0].collapse()
-    else
-      header = selected.parents('.list-nested-item.expanded').first()[0]
-      header?.collapse()
-      @selectEntry header if header?
+  select: (entry)->
+    @deselect()
+    @selected = entry
+    @selected.addClass 'selected'
 
-  entryClicked: (e) ->
-    entry = e.currentTarget
-    @selectEntry(entry)
-    @confirm()
-    false
-
-  selectedEntry: ->
-    @list.find('.selected')
-
-  selectEntry: (entry) ->
-    return unless entry?
-    @selectedEntry().removeClass 'selected'
-    entry.classList.add('selected')
-    @scrollTo entry
-
-  scrollTo: (entry)->
-    displayElement = $(entry)
-    scroller = @list.offsetParent()
-
-    top = displayElement.position().top + scroller.scrollTop()
+    scroller = @offsetParent()
+    top = entry.position().top + scroller.scrollTop()
     if top < scroller.scrollTop()
       scroller.scrollTop top
-
-    bot = top + displayElement.outerHeight()
+    bot = top + entry.outerHeight()
     if bot > scroller.scrollBottom()
       scroller.scrollTop bot-scroller.height()
+
+  collapse: ->
+    if @selected.is('.expanded')
+      @selected.collapse()
+    else
+      prev = @selected.parents('.entry').first()
+      @select prev.view() if prev[0]
+
+  expand: ->
+    @selected.expand()
+
+  moveDown: ->
+    if @selected.is '.expanded'
+      return @select @selected.find('.entry').first().view()
+    sel = @selected
+    next = sel.next('.entry')
+    while not next[0]
+      sel = sel.parents('.entry').first()
+      return unless sel[0]
+      next = sel.next('.entry')
+    @select next.view()
+
+  moveUp: ->
+    prev = @selected.prev('.entry')
+    if prev[0]
+      if prev.is '.expanded'
+        @select prev.find('.entry').last().view()
+      else
+        @select prev.view()
+    else
+      prev = @selected.parents('.entry').first()
+      return @select prev.view() if prev[0]
+
+  pageDown: ->
+    next = @selected.next('.entry')
+    @select next.view() if next[0]
+
+  pageUp: ->
+    prev = @selected.prev('.entry')
+    @select prev.view() if prev[0]

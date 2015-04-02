@@ -39,14 +39,24 @@ class TreeView extends View
     @deselect()
     @selected = entry
     @selected.addClass 'selected'
+    @scrollTo @selected.header
 
+  scrollTo: (dom)->
     scroller = @offsetParent()
-    top = entry.position().top + scroller.scrollTop()
-    if top < scroller.scrollTop()
-      scroller.scrollTop top
-    bot = top + entry.outerHeight()
-    if bot > scroller.scrollBottom()
-      scroller.scrollTop bot-scroller.height()
+    top = dom.position().top
+    bot = scroller.height() - top - dom.outerHeight()
+
+    amount = 0
+    if bot < 0
+      amount -= bot
+      top -= amount
+    if top < 0
+      amount += top
+    scroller.scrollTop scroller.scrollTop() + amount
+
+  deselect: ->
+    @selected?.removeClass 'selected'
+    @selected = null
 
   collapse: ->
     if @selected.is('.expanded')
@@ -80,10 +90,18 @@ class TreeView extends View
       prev = @selected.parents('.entry').first()
       return @select prev.view() if prev[0]
 
+  postPage: ->
+    scroller = @offsetParent()
+    scroller.scrollTop scroller.scrollTop() + @selected.position().top
+
   pageDown: ->
     next = @selected.next('.entry')
-    @select next.view() if next[0]
+    if next[0]
+      @select next.view()
+      @postPage()
 
   pageUp: ->
     prev = @selected.prev('.entry')
-    @select prev.view() if prev[0]
+    if prev[0]
+      @select prev.view()
+      @postPage()

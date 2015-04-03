@@ -13,6 +13,7 @@ class TreeView extends View
       '-moz-user-select':     'none'
       '-khtml-user-select':   'none'
       '-webkit-user-select':  'none'
+
     atom.commands.add @element,
       'core:move-left':  => @collapse()
       'core:move-right': => @expand()
@@ -22,8 +23,9 @@ class TreeView extends View
       'core:page-up':    => @pageUp()
       'core:confirm':    => @confirm()
 
-    @on 'focus', => @select()
-    @on 'click', '.entry', (e)=>
+    @on 'focus', =>
+      @select()
+    @on 'click', (e)=>
       @select $(e.target).view()
       @confirm()
 

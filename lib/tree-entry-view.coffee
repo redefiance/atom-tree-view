@@ -13,7 +13,6 @@ class TreeEntryView extends View
     @name.text @config.text
     @name.addClass @config.icon if @config.icon?
 
-    @entries = []
     @emitter = new Emitter
 
   addEntry: (entry)->

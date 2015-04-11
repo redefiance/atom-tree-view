@@ -1,2 +1,2 @@
-exports.TreeEntryView = require './tree-entry-view'
+exports.TreeItem = require './tree-item'
 exports.TreeView = require './tree-view'

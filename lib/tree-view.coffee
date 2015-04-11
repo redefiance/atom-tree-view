@@ -1,5 +1,5 @@
 {$, View} = require 'space-pen'
-TreeEntryView = require './tree-entry-view'
+TreeEntryView = require './tree-item'
 
 module.exports =
 class TreeView extends View
@@ -109,7 +109,7 @@ class TreeView extends View
     return unless @selected
     next = @selected.next('.entry')
     if next[0]
-      if @selected.move?(next)
+      if @selected.swap?(next)
         @selected.insertAfter next
       else
         @select next.view()
@@ -119,7 +119,7 @@ class TreeView extends View
     return unless @selected
     prev = @selected.prev('.entry')
     if prev[0]
-      if @selected.move?(prev)
+      if @selected.swap?(prev)
         @selected.insertBefore prev
       else
         @select prev.view()

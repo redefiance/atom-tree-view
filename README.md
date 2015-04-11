@@ -28,11 +28,11 @@ view.addItem item2
 item1.addItem subitem1
 ```
 
-`TreeItem` methods:  
-- `swap (other)`:
+All these `TreeItem` methods take a function as their only argument:
+- `onConfirm`
+- `onSelect`
+- `onDeselect`
+- `onRemove`
 
-`TreeItem.emitter` events: 
-- `confirmed`:
-- `selected`:
-- `deselected`:
-- `destroyed`:
+`TreeItem` optional methods (must be defined):
+- `swap (other)`:

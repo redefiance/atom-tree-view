@@ -15,15 +15,24 @@ In .coffee:
 ```coffee
 {TreeItem, TreeView} = require 'atom-tree-view'
 
-item1 = new TreeItem('this is a top-level entry', 'icon-file-directory')
-item2 = new TreeItem('another top-level entry without icon')
-subitem1 = new TreeItem('this is a lower-level entry', 'icon-file-submodule')
-subitem1.confirm = ->
+item1 = new TreeItem 'this is a top-level entry', 'icon-file-directory'
+item2 = new TreeItem 'another top-level entry without icon'
+subitem1 = new TreeItem 'this is a lower-level entry', 'icon-file-submodule'
+subitem1.trigger = ->
   subitem1.destroy()
-  console.log('selected and removed subitem!')
+  console.log 'subitem got removed when triggered!'
 
 view = new TreeView
 view.addItem item1
 view.addItem item2
 item1.addItem subitem1
 ```
+
+`TreeItem` methods:  
+- `swap (other)`:
+
+`TreeItem.emitter` events: 
+- `confirmed`:
+- `selected`:
+- `deselected`:
+- `destroyed`:

@@ -3,34 +3,19 @@
 
 module.exports =
 class TreeEntryView extends View
-  @content: ->
-    @li class: 'entry list-item', =>
-      @div outlet: 'header', class: 'header list-item', =>
-        @span outlet: 'name', class: 'name icon'
-      @ol outlet: 'list', class: 'list-tree'
+  ## public
+  onConfirm:  (f)-> @emitter.on 'confirmed',  => f()
+  onSelect:   (f)-> @emitter.on 'selected',   => f()
+  onDeselect: (f)-> @emitter.on 'deselected', => f()
+  onRemove:   (f)-> @emitter.on 'removed',    => f()
 
-  initialize: (config)->
-    @name.text @config.text
-    @name.addClass @config.icon if @config.icon?
-    @confirm = config.confirm
+  remove: ->
+    super()
+    @emitter.emit 'removed'
 
-    @emitter = new Emitter
-
-  addEntry: (entry)->
-    @list.append entry
-    unless @is('list-nested-item')
-      @removeClass 'list-item'
-      @addClass 'list-nested-item'
-      @expand()
-
-    entry.emitter.on 'destroyed', =>
-      unless @list.find('.entry')[0]
-        @removeClass 'list-nested-item collapsed expanded'
-        @addClass 'list-item'
-
-  destroy: ->
-    @emitter.emit 'destroyed'
-    @remove()
+  toggleExpansion: ->
+    return @collapse() if @is '.expanded'
+    return @expand() if @is '.collapsed'
 
   expand: ->
     @addClass 'expanded'
@@ -39,3 +24,37 @@ class TreeEntryView extends View
   collapse: ->
     @addClass 'collapsed'
     @removeClass 'expanded'
+
+  addEntry: (entry)->
+    @list.append entry
+    unless @is 'list-nested-item'
+      @removeClass 'list-item'
+      @addClass 'list-nested-item'
+      @expand()
+    entry.onRemove => unless @list.find('.entry')[0]
+      @removeClass 'list-nested-item collapsed expanded'
+      @addClass 'list-item'
+
+  ## private
+  @content: ->
+    @li class: 'entry list-item', =>
+      @div outlet: 'header', class: 'header list-item', =>
+        @span outlet: 'name', class: 'name icon'
+      @ol outlet: 'list', class: 'list-tree'
+
+  initialize: (name, icon)->
+    @name.text name
+    @name.addClass icon if icon
+    @emitter = new Emitter
+
+  confirm: ->
+    @toggleExpansion()
+    @emitter.emit 'confirmed'
+
+  select: ->
+    @addClass 'selected'
+    @emitter.emit 'selected'
+
+  deselect: ->
+    @removeClass 'selected'
+    @emitter.emit 'deselected'

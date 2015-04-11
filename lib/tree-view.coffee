@@ -25,27 +25,31 @@ class TreeView extends View
 
     @on 'focus', =>
       @select()
-    @on 'click', (e)=>
-      @select $(e.target).view()
+
+    @on 'click', '.entry', (e)=>
+      e.stopImmediatePropagation()
+      entry = $(e.target).view()
+      @select entry
+      clickedHandle = e.pageX - entry.find('.header').position().left <= 15
+      return entry.toggleExpansion() if clickedHandle
       @confirm()
 
   addEntry: (entry)->
     @append entry
     @select()
 
-  confirm: ->
-    return @collapse() if @selected.is('.expanded')
-    return @expand() if @selected.is('.collapsed')
-    @selected.confirm()
-
   select: (entry)->
+    if not entry and @selected then return
     if not entry then entry = @find('.entry').first().view()
     if not entry then return
-
-    @deselect()
+    @selected?.deselect()
+    entry.select()
     @selected = entry
-    @selected.addClass 'selected'
     @scrollTo @selected.header
+
+  confirm: ->
+    return unless @selected
+    @selected.confirm()
 
   scrollTo: (dom)->
     scroller = @offsetParent()
@@ -59,10 +63,6 @@ class TreeView extends View
     if top < 0
       amount += top
     scroller.scrollTop scroller.scrollTop() + amount
-
-  deselect: ->
-    @selected?.removeClass 'selected'
-    @selected = null
 
   collapse: ->
     return unless @selected
@@ -109,12 +109,18 @@ class TreeView extends View
     return unless @selected
     next = @selected.next('.entry')
     if next[0]
-      @select next.view()
+      if @selected.move?(next)
+        @selected.insertAfter next
+      else
+        @select next.view()
       @postPage()
 
   pageUp: ->
     return unless @selected
     prev = @selected.prev('.entry')
     if prev[0]
-      @select prev.view()
+      if @selected.move?(prev)
+        @selected.insertBefore prev
+      else
+        @select prev.view()
       @postPage()

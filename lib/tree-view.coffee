@@ -25,17 +25,19 @@ class TreeView extends View
 
     @on 'focus', => @select()
     @on 'blur',  => setTimeout (=> @deselect() unless @is ':focus'), 0
-    @on 'click', '.entry', (e)=>
-      e.stopImmediatePropagation()
-      entry = $(e.target).view()
-      @select entry
-      clickedHandle = e.pageX - entry.find('.header').position().left <= 15
-      return entry.toggleExpansion() if clickedHandle
-      @confirm()
+    @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
   addEntry: (entry)->
     @append entry
     @select()
+
+  clickedOnEntry: (e)->
+    e.stopImmediatePropagation()
+    entry = $(e.target).view()
+    @select entry
+    handleClicked = e.pageX - entry.find('.header').position().left <= 15
+    return entry.toggleExpansion() if handleClicked
+    @confirm()
 
   select: (entry)->
     if entry is undefined

@@ -2,7 +2,7 @@
 {Emitter} = require 'atom'
 
 module.exports =
-class TreeEntryView extends View
+class TreeItem extends View
   ## public
   onConfirm:  (f)=> @events.on 'confirmed',  f.bind @
   onSelect:   (f)=> @events.on 'selected',   f.bind @
@@ -34,6 +34,11 @@ class TreeEntryView extends View
     entry.onRemove => unless @list.find('.entry')[0]
       @removeClass 'list-nested-item collapsed expanded'
       @addClass 'list-item'
+
+  parentItem: -> @parents('.entry:first').view()
+  subItems: -> $(e).view() for e in @list.children('.entry')
+  prevItem: -> @prev('.entry').view()
+  nextItem: -> @next('.entry').view()
 
   ## private
   @content: ->

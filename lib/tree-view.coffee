@@ -1,5 +1,5 @@
 {$, View} = require 'space-pen'
-TreeEntryView = require './tree-item'
+TreeItem = require './tree-item'
 
 module.exports =
 class TreeView extends View
@@ -62,7 +62,6 @@ class TreeView extends View
     scroller = @offsetParent()
     top = dom.position().top
     bot = scroller.height() - top - dom.outerHeight()
-
     amount = 0
     if bot < 0
       amount -= bot
@@ -86,48 +85,42 @@ class TreeView extends View
   moveDown: ->
     return unless @selected
     if @selected.is '.expanded'
-      return @select @selected.find('.entry').first().view()
-    sel = @selected
-    next = sel.next('.entry')
-    while not next[0]
-      sel = sel.parents('.entry').first()
-      return unless sel[0]
-      next = sel.next('.entry')
-    @select next.view()
+      return @select @selected.subItems()[0]
+    e = @selected
+    next = null
+    while e and not next
+      next = e.nextItem()
+      e = e.parentItem()
+    @select next
 
   moveUp: ->
     return unless @selected
-    prev = @selected.prev('.entry')
-    if prev[0]
-      if prev.is '.expanded'
-        @select prev.find('.entry').last().view()
-      else
-        @select prev.view()
-    else
-      prev = @selected.parents('.entry').first()
-      return @select prev.view() if prev[0]
+    prev = @selected.prevItem()
+    return @select @selected.parentItem() unless prev
+    while prev.is '.expanded'
+      sub = prev.subItems()
+      prev = sub[sub.length-1]
+    @select prev
 
-  postPage: ->
+  alignTop: ->
     return unless @selected
     scroller = @offsetParent()
     scroller.scrollTop scroller.scrollTop() + @selected.position().top
 
   pageDown: ->
-    return unless @selected
-    next = @selected.next('.entry')
-    if next[0]
-      if @selected.swap?(next)
-        @selected.insertAfter next
-      else
-        @select next.view()
-      @postPage()
+    next = @selected?.nextItem()
+    return unless next
+    if @selected.swap? next
+      @selected.insertAfter next
+    else
+      @select next
+      @alignTop()
 
   pageUp: ->
-    return unless @selected
-    prev = @selected.prev('.entry')
-    if prev[0]
-      if @selected.swap?(prev)
-        @selected.insertBefore prev
-      else
-        @select prev.view()
-      @postPage()
+    prev = @selected?.prevItem()
+    return unless prev
+    if @selected.swap? prev
+      @selected.insertBefore prev
+    else
+      @select prev
+      @alignTop()

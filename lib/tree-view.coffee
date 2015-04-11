@@ -23,9 +23,8 @@ class TreeView extends View
       'core:page-up':    => @pageUp()
       'core:confirm':    => @confirm()
 
-    @on 'focus', =>
-      @select()
-
+    @on 'focus', => @select()
+    @on 'blur',  => setTimeout (=> @deselect() unless @is ':focus'), 0
     @on 'click', '.entry', (e)=>
       e.stopImmediatePropagation()
       entry = $(e.target).view()
@@ -44,10 +43,14 @@ class TreeView extends View
       first = @find('.entry').first().view()
       if first then @select first
       return
-    @selected?.deselect()
+    @deselect()
     @selected = entry
     @selected.select()
     @scrollTo @selected.header
+
+  deselect: ->
+    @selected?.deselect()
+    @selected = null
 
   confirm: ->
     return unless @selected

@@ -39,12 +39,14 @@ class TreeView extends View
     @select()
 
   select: (entry)->
-    if not entry and @selected then return
-    if not entry then entry = @find('.entry').first().view()
-    if not entry then return
+    if entry is undefined
+      return if @selected?
+      first = @find('.entry').first().view()
+      if first then @select first
+      return
     @selected?.deselect()
-    entry.select()
     @selected = entry
+    @selected.select()
     @scrollTo @selected.header
 
   confirm: ->

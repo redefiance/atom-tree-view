@@ -4,14 +4,14 @@
 module.exports =
 class TreeEntryView extends View
   ## public
-  onConfirm:  (f)-> @emitter.on 'confirmed',  => f()
-  onSelect:   (f)-> @emitter.on 'selected',   => f()
-  onDeselect: (f)-> @emitter.on 'deselected', => f()
-  onRemove:   (f)-> @emitter.on 'removed',    => f()
+  onConfirm:  (f)=> @events.on 'confirmed',  f.bind @
+  onSelect:   (f)=> @events.on 'selected',   f.bind @
+  onDeselect: (f)=> @events.on 'deselected', f.bind @
+  onRemove:   (f)=> @events.on 'removed',    f.bind @
 
   remove: ->
     super()
-    @emitter.emit 'removed'
+    @events.emit 'removed'
 
   toggleExpansion: ->
     return @collapse() if @is '.expanded'
@@ -45,16 +45,16 @@ class TreeEntryView extends View
   initialize: (name, icon)->
     @name.text name
     @name.addClass icon if icon
-    @emitter = new Emitter
+    @events = new Emitter
 
-  confirm: ->
+  confirm: =>
     @toggleExpansion()
-    @emitter.emit 'confirmed'
+    @events.emit 'confirmed'
 
-  select: ->
+  select: =>
     @addClass 'selected'
-    @emitter.emit 'selected'
+    @events.emit 'selected'
 
-  deselect: ->
+  deselect: =>
     @removeClass 'selected'
-    @emitter.emit 'deselected'
+    @events.emit 'deselected'

@@ -9,9 +9,10 @@ class TreeEntryView extends View
         @span outlet: 'name', class: 'name icon'
       @ol outlet: 'list', class: 'list-tree'
 
-  initialize: (@config)->
+  initialize: (config)->
     @name.text @config.text
     @name.addClass @config.icon if @config.icon?
+    @confirm = config.confirm
 
     @emitter = new Emitter
 
@@ -30,9 +31,6 @@ class TreeEntryView extends View
   destroy: ->
     @emitter.emit 'destroyed'
     @remove()
-
-  confirm: ->
-    @config.confirm?()
 
   expand: ->
     @addClass 'expanded'

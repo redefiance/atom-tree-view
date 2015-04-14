@@ -72,7 +72,7 @@ class TreeView extends View
 
   collapse: ->
     return unless @selected
-    if @selected.is('.expanded')
+    if @selected.is '.list-nested-item.expanded'
       @selected.collapse()
     else
       prev = @selected.parents('.entry').first()
@@ -84,7 +84,7 @@ class TreeView extends View
 
   moveDown: ->
     return unless @selected
-    if @selected.is '.expanded'
+    if @selected.is '.list-nested-item.expanded'
       return @select @selected.subItems()[0]
     e = @selected
     next = null
@@ -97,7 +97,7 @@ class TreeView extends View
     return unless @selected
     prev = @selected.prevItem()
     return @select @selected.parentItem() unless prev
-    while prev.is '.expanded'
+    while prev.is '.list-nested-item.expanded'
       sub = prev.subItems()
       prev = sub[sub.length-1]
     @select prev

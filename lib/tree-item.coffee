@@ -29,7 +29,8 @@ class TreeItem extends View
     @list.append item
     unless @is '.list-nested-item'
       @removeClass 'list-item'
-      @addClass 'list-nested-item collapsed'
+      @addClass 'list-nested-item'
+      @addClass 'collapsed' unless @is '.expanded'
     item.onRemove => if @subItems().length == 0
       @removeClass 'list-nested-item collapsed expanded'
       @addClass 'list-item'

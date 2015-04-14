@@ -2,6 +2,8 @@
 
 Provides a configurable view for arbitrary tree lists.
 
+work in progress - use/fork at your discretion.
+
 ### Usage
 
 In package.json:
@@ -18,9 +20,9 @@ In .coffee:
 item1 = new TreeItem 'this is a top-level entry', 'icon-file-directory'
 item2 = new TreeItem 'another top-level entry without icon'
 subitem1 = new TreeItem 'this is a lower-level entry', 'icon-file-submodule'
-subitem1.trigger = ->
-  subitem1.destroy()
-  console.log 'subitem got removed when triggered!'
+subitem1.onConfirm = ->
+  console.log @, 'clicked and subsequently removed'
+  @destroy()
 
 view = new TreeView
 view.addItem item1

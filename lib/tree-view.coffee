@@ -41,9 +41,10 @@ class TreeView extends View
   createItems: (path, creator)->
     it = @
     for name, i in path
-      e = it.find(".entry[name='#{name}']").view()
+      e = it.find(".entry[path='#{name}']").view()
       unless e?
         e = creator i, name
+        e.attr 'path': name
         it.addItem e
       it = e
 
@@ -80,9 +81,9 @@ class TreeView extends View
 
   clickedOnEntry: (e)->
     e.stopImmediatePropagation()
-    item = $(e.target).view()
+    item = $(e.currentTarget).view()
     @select item
-    handleClicked = e.pageX - item.find('.header').position().left <= 15
+    handleClicked = e.pageX - item.header.position().left <= 15
     return item.toggleExpansion() if handleClicked
     @confirm()
 
@@ -112,9 +113,7 @@ class TreeView extends View
 
   moveDown: ->
     return unless @selected
-    console.log @selected, @selected.isExpanded()
     if @selected.isExpanded()
-      console.log 'selecting subitem'
       return @select @selected.subItems()[0]
     e = @selected
     next = null

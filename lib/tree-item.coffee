@@ -7,13 +7,12 @@ class TreeItem extends View
     @li class: 'entry list-item', =>
       @div outlet: 'header', class: 'header list-item'
 
-  initialize: (name, iconOrDOM)->
-    @attr 'name': name
-    if typeof(iconOrDOM) is 'object'
-      @header.append iconOrDOM
+  initialize: (content, icon)->
+    if typeof(content) is 'object'
+      @header.append content
     else
-      label = $$ -> @span name, class: 'icon'
-      label.addClass iconOrDOM if iconOrDOM
+      label = $$ -> @span content
+      label.addClass 'icon '+icon if icon
       @header.append label
     @events = new Emitter
 
@@ -66,19 +65,24 @@ class TreeItem extends View
   ###
   Expansion state
   ###
+
   isExpanded: ->
     @list? and @is '.expanded'
 
   toggleExpansion: ->
     if @isExpanded() then @collapse() else @expand()
 
-  expand: ->
+  expand: (recursive)->
     @addClass 'expanded'
     @removeClass 'collapsed'
+    if recursive
+      parentItem().expand(true)
 
-  collapse: ->
+  collapse: (recursive)->
     @addClass 'collapsed'
     @removeClass 'expanded'
+    if recursive
+      item.collapse(true) for item in @subItems()
 
   ###
   TreeView navigation

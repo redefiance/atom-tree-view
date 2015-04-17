@@ -1,4 +1,4 @@
-{$, View} = require 'space-pen'
+{$, $$, View} = require 'space-pen'
 {Emitter} = require 'atom'
 
 module.exports =
@@ -7,12 +7,10 @@ class TreeItem extends View
     @li class: 'entry list-item', =>
       @div outlet: 'header', class: 'header list-item', =>
         @span outlet: 'label', class: 'icon'
-      @ol outlet: 'list', class: 'list-tree'
 
   initialize: (name, icon)->
     @label.text     name
     @label.addClass icon if icon
-
     @events = new Emitter
 
   #
@@ -49,13 +47,15 @@ class TreeItem extends View
   #
 
   addItem: (item)->
-    @list.append item
-    unless @is '.list-nested-item'
+    unless @list?
+      @append (@list = $$ -> @ol class: 'list-tree')
       @removeClass 'list-item'
       @addClass 'list-nested-item'
-      @addClass 'collapsed' unless @is '.expanded'
+    @list.append item
     item.onRemove => if @subItems().length == 0
-      @removeClass 'list-nested-item collapsed expanded'
+      @list.remove()
+      @list = undefined
+      @removeClass 'list-nested-item'
       @addClass 'list-item'
 
   #

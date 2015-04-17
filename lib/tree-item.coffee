@@ -13,18 +13,18 @@ class TreeItem extends View
     @label.addClass icon if icon
     @events = new Emitter
 
-  #
-  # Events
-  #
+  ###
+  Events
+  ###
 
   onConfirm:  (f)-> @events.on 'confirmed',  f.bind @
   onSelect:   (f)-> @events.on 'selected',   f.bind @
   onDeselect: (f)-> @events.on 'deselected', f.bind @
   onRemove:   (f)-> @events.on 'removed',    f.bind @
 
-  #
-  # Interaction
-  #
+  ###
+  Interaction
+  ###
 
   confirm: =>
     @toggleExpansion()
@@ -42,9 +42,9 @@ class TreeItem extends View
     super()
     @events.emit 'removed'
 
-  #
-  # Subitems
-  #
+  ###
+  Subitems
+  ###
 
   addItem: (item)->
     unless @list?
@@ -58,9 +58,9 @@ class TreeItem extends View
       @removeClass 'list-nested-item'
       @addClass 'list-item'
 
-  #
-  # Expansion state
-  #
+  ###
+  Expansion state
+  ###
 
   toggleExpansion: ->
     return @collapse() if @is '.expanded'
@@ -73,9 +73,10 @@ class TreeItem extends View
   collapse: ->
     @addClass 'collapsed'
     @removeClass 'expanded'
-  #
-  # TreeView navigation
-  #
+
+  ###
+  TreeView navigation
+  ###
 
   parentItem: ->
     @parents('.entry:first').view()

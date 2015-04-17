@@ -4,7 +4,7 @@ TreeItem = require './tree-item'
 module.exports =
 class TreeView extends View
   @content: ->
-    @ol class: 'list-tree has-collapsable-children focusable-panel', tabindex: -1
+    @ol tabindex: -1, class: 'list-tree has-collapsable-children'
 
   initialize: ->
     @css

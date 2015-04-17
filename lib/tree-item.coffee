@@ -5,17 +5,16 @@ module.exports =
 class TreeItem extends View
   @content: ->
     @li class: 'entry list-item', =>
-      @div outlet: 'header', class: 'header list-item', =>
-        @span outlet: 'label', class: 'icon'
+      @div outlet: 'header', class: 'header list-item'
 
-  initialize: (title, icon)->
-    if typeof(title) is 'string'
-      label = $$ -> @span title, class: 'icon'
-      label.addClass icon if icon
-      @header.append label
+  initialize: (name, iconOrDOM)->
+    @attr 'name': name
+    if typeof(iconOrDOM) is 'object'
+      @header.append iconOrDOM
     else
-      @header.append title
-
+      label = $$ -> @span name, class: 'icon'
+      label.addClass iconOrDOM if iconOrDOM
+      @header.append label
     @events = new Emitter
 
   ###
@@ -56,6 +55,7 @@ class TreeItem extends View
       @append (@list = $$ -> @ol class: 'list-tree')
       @removeClass 'list-item'
       @addClass 'list-nested-item'
+      @addClass 'collapsed' unless @isExpanded()
     @list.append item
     item.onRemove => if @subItems().length == 0
       @list.remove()
@@ -66,10 +66,11 @@ class TreeItem extends View
   ###
   Expansion state
   ###
+  isExpanded: ->
+    @list? and @is '.expanded'
 
   toggleExpansion: ->
-    return @collapse() if @is '.expanded'
-    return @expand()   if @is '.collapsed'
+    if @isExpanded() then @collapse() else @expand()
 
   expand: ->
     @addClass 'expanded'

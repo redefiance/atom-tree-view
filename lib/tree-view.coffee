@@ -27,6 +27,7 @@ class TreeView extends View
     @on 'blur',  => @deselect()
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
+    @lookup = {}
   ###
   Events
   ###
@@ -36,6 +37,15 @@ class TreeView extends View
   ###
   Items
   ###
+
+  createItems: (path, creator)->
+    it = @
+    for name, i in path
+      e = it.find(".entry[name='#{name}']").view()
+      unless e?
+        e = creator i, name
+        it.addItem e
+      it = e
 
   addItem: (item)->
     @append item
@@ -90,7 +100,7 @@ class TreeView extends View
 
   moveLeft: ->
     return unless @selected
-    if @selected.is '.list-nested-item.expanded'
+    if @selected.isExpanded()
       @selected.collapse()
     else
       prev = @selected.parents('.entry').first()
@@ -102,7 +112,9 @@ class TreeView extends View
 
   moveDown: ->
     return unless @selected
-    if @selected.is '.list-nested-item.expanded'
+    console.log @selected, @selected.isExpanded()
+    if @selected.isExpanded()
+      console.log 'selecting subitem'
       return @select @selected.subItems()[0]
     e = @selected
     next = null
@@ -115,7 +127,7 @@ class TreeView extends View
     return unless @selected
     prev = @selected.prevItem()
     return @select @selected.parentItem() unless prev
-    while prev.is '.list-nested-item.expanded'
+    while prev.isExpanded()
       sub = prev.subItems()
       prev = sub[sub.length-1]
     @select prev

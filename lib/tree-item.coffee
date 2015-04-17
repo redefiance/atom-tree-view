@@ -8,9 +8,14 @@ class TreeItem extends View
       @div outlet: 'header', class: 'header list-item', =>
         @span outlet: 'label', class: 'icon'
 
-  initialize: (name, icon)->
-    @label.text     name
-    @label.addClass icon if icon
+  initialize: (title, icon)->
+    if typeof(title) is 'string'
+      label = $$ -> @span title, class: 'icon'
+      label.addClass icon if icon
+      @header.append label
+    else
+      @header.append title
+
     @events = new Emitter
 
   ###

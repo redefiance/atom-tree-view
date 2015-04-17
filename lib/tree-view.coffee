@@ -4,7 +4,8 @@ TreeItem = require './tree-item'
 module.exports =
 class TreeView extends View
   @content: ->
-    @ol tabindex: -1, class: 'list-tree has-collapsable-children'
+    @ol tabindex: -1, class: 'tree-view list-tree '+
+      'has-collapsable-children focusable-panel'
 
   initialize: ->
     @css
@@ -23,8 +24,6 @@ class TreeView extends View
       'core:page-up':    => @pageUp()
       'core:confirm':    => @confirm()
 
-    @on 'focus', => @select()
-    @on 'blur',  => @deselect()
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
     @lookup = {}
@@ -82,9 +81,11 @@ class TreeView extends View
   clickedOnEntry: (e)->
     e.stopImmediatePropagation()
     item = $(e.currentTarget).view()
-    @select item
+    return @select item unless item is @selected
+
     handleClicked = e.pageX - item.header.position().left <= 15
     return item.toggleExpansion() if handleClicked
+
     @confirm()
 
   scrollTo: (dom)->

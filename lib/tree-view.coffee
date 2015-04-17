@@ -15,8 +15,8 @@ class TreeView extends View
       '-webkit-user-select':  'none'
 
     atom.commands.add @element,
-      'core:move-left':  => @collapse()
-      'core:move-right': => @expand()
+      'core:move-left':  => @moveLeft()
+      'core:move-right': => @moveRight()
       'core:move-down':  => @moveDown()
       'core:move-up':    => @moveUp()
       'core:page-down':  => @pageDown()
@@ -24,20 +24,26 @@ class TreeView extends View
       'core:confirm':    => @confirm()
 
     @on 'focus', => @select()
-    @on 'blur',  => setTimeout (=> @deselect() unless @is ':focus'), 0
+    @on 'blur',  => @deselect()
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
+
+  ###
+  Events
+  ###
+
+  # None, apparently
+
+  ###
+  Items
+  ###
 
   addItem: (item)->
     @append item
     @select()
 
-  clickedOnEntry: (e)->
-    e.stopImmediatePropagation()
-    item = $(e.target).view()
-    @select item
-    handleClicked = e.pageX - item.find('.header').position().left <= 15
-    return item.toggleExpansion() if handleClicked
-    @confirm()
+  ###
+  Interaction
+  ###
 
   select: (item)->
     if item is undefined
@@ -58,6 +64,18 @@ class TreeView extends View
     return unless @selected
     @selected.confirm()
 
+  ###
+  Internal
+  ###
+
+  clickedOnEntry: (e)->
+    e.stopImmediatePropagation()
+    item = $(e.target).view()
+    @select item
+    handleClicked = e.pageX - item.find('.header').position().left <= 15
+    return item.toggleExpansion() if handleClicked
+    @confirm()
+
   scrollTo: (dom)->
     scroller = @offsetParent()
     top = dom.position().top
@@ -70,7 +88,7 @@ class TreeView extends View
       amount += top
     scroller.scrollTop scroller.scrollTop() + amount
 
-  collapse: ->
+  moveLeft: ->
     return unless @selected
     if @selected.is '.list-nested-item.expanded'
       @selected.collapse()
@@ -78,7 +96,7 @@ class TreeView extends View
       prev = @selected.parents('.entry').first()
       @select prev.view() if prev[0]
 
-  expand: ->
+  moveRight: ->
     return unless @selected
     @selected.expand()
 
@@ -102,11 +120,6 @@ class TreeView extends View
       prev = sub[sub.length-1]
     @select prev
 
-  alignTop: ->
-    return unless @selected
-    scroller = @offsetParent()
-    scroller.scrollTop scroller.scrollTop() + @selected.position().top
-
   pageDown: ->
     next = @selected?.nextItem()
     return unless next
@@ -124,3 +137,8 @@ class TreeView extends View
     else
       @select prev
       @alignTop()
+
+  alignTop: ->
+    return unless @selected
+    scroller = @offsetParent()
+    scroller.scrollTop scroller.scrollTop() + @selected.position().top

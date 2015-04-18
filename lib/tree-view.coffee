@@ -23,8 +23,8 @@ class TreeView extends View
       'core:page-down':  => @pageDown()
       'core:page-up':    => @pageUp()
       'core:confirm':    => @confirm()
-      'tree-view:collapse-directory': => @moveLeft()
-      'tree-view:expand-directory':   => @moveRight()
+      'tree-view:collapse-directory': => @collapse()
+      'tree-view:expand-directory':   => @expand()
 
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
@@ -80,6 +80,25 @@ class TreeView extends View
     @selected.confirm()
 
   ###
+  Expansion State
+  ###
+
+  expand: ->
+    return unless @selected
+    if @selected.isExpanded()
+      @select @selected.subItems()[0]
+    else
+      @selected.expand()
+
+  collapse: ->
+    return unless @selected
+    if @selected.isExpanded()
+      @selected.collapse()
+    else
+      prev = @selected.parents('.entry').first()
+      @select prev.view() if prev[0]
+
+  ###
   Internal
   ###
 
@@ -102,18 +121,6 @@ class TreeView extends View
       p.scrollBottom bot
     if top < p.scrollTop()
       p.scrollTop top
-
-  moveLeft: ->
-    return unless @selected
-    if @selected.isExpanded()
-      @selected.collapse()
-    else
-      prev = @selected.parents('.entry').first()
-      @select prev.view() if prev[0]
-
-  moveRight: ->
-    return unless @selected
-    @selected.expand()
 
   moveDown: ->
     return unless @selected

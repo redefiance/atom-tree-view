@@ -44,8 +44,12 @@ class TreeView extends View
     item.onRemove => delete @items[item.id]
     @select()
 
-  getItem: (id)->
-    @items[id]
+  getItem: (idOrPath)->
+    if typeof(id) is string
+      return @items[id]
+    it = @
+    it = it?.getItem id for id in idOrPath
+    it
 
   createItems: (path, creator)->
     it = @
@@ -99,28 +103,8 @@ class TreeView extends View
       @select prev.view() if prev[0]
 
   ###
-  Internal
+  Navigation
   ###
-
-  clickedOnEntry: (e)->
-    e.stopImmediatePropagation()
-    item = $(e.currentTarget).view()
-    return @select item unless item is @selected
-
-    handleClicked = e.pageX - item.header.position().left <= 15
-    return item.toggleExpansion() if handleClicked
-
-    @confirm()
-
-  scrollTo: (item)->
-    top = item.position().top
-    bot = top + item.outerHeight()
-
-    p = @offsetParent()
-    if bot > p.scrollBottom()
-      p.scrollBottom bot
-    if top < p.scrollTop()
-      p.scrollTop top
 
   moveDown: ->
     return unless @selected
@@ -159,6 +143,30 @@ class TreeView extends View
     else
       @select prev
       @alignTop()
+
+  ###
+  Internal
+  ###
+
+  clickedOnEntry: (e)->
+    e.stopImmediatePropagation()
+    item = $(e.currentTarget).view()
+    return @select item unless item is @selected
+
+    handleClicked = e.pageX - item.header.position().left <= 15
+    return item.toggleExpansion() if handleClicked
+
+    @confirm()
+
+  scrollTo: (item)->
+    top = item.position().top
+    bot = top + item.outerHeight()
+
+    p = @offsetParent()
+    if bot > p.scrollBottom()
+      p.scrollBottom bot
+    if top < p.scrollTop()
+      p.scrollTop top
 
   alignTop: ->
     return unless @selected

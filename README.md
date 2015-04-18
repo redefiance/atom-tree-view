@@ -61,7 +61,7 @@ onSelect:   (f)->
 onDeselect: (f)->
 onRemove:   (f)->
 ```
-Add callback handlers to various events. `@` is bound to the instance of `TreeItem`.
+Adds the callback function f to various events. `@` is bound to the instance of `TreeItem`.  
 `onConfirm` is triggered when the item was already selected and was clicked again or the enter key is hit.  
 `onSelect` is triggered when the item was selected.  
 `onDeselect` is triggered when the item was deselected.  

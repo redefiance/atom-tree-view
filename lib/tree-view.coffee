@@ -8,6 +8,8 @@ class TreeView extends View
       'has-collapsable-children focusable-panel'
 
   initialize: ->
+    @items = {}
+
     @css
       'padding-left':         '10px'
       'user-select':          'none'
@@ -16,17 +18,16 @@ class TreeView extends View
       '-webkit-user-select':  'none'
 
     atom.commands.add @element,
-      'core:move-left':  => @moveLeft()
-      'core:move-right': => @moveRight()
       'core:move-down':  => @moveDown()
       'core:move-up':    => @moveUp()
       'core:page-down':  => @pageDown()
       'core:page-up':    => @pageUp()
       'core:confirm':    => @confirm()
+      'tree-view:collapse-directory': => @moveLeft()
+      'tree-view:expand-directory':   => @moveRight()
 
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
-    @lookup = {}
   ###
   Events
   ###
@@ -37,19 +38,23 @@ class TreeView extends View
   Items
   ###
 
-  createItems: (path, creator)->
-    it = @
-    for name, i in path
-      e = it.find(".entry[path='#{name}']").view()
-      unless e?
-        e = creator i, name
-        e.attr 'path': name
-        it.addItem e
-      it = e
-
   addItem: (item)->
     @append item
+    @items[item.id] = item
+    item.onRemove => delete @items[item.id]
     @select()
+
+  getItem: (id)->
+    @items[id]
+
+  createItems: (path, creator)->
+    it = @
+    for id, i in path
+      e = it.getItem id
+      unless e?
+        e = creator i, id
+        it.addItem e
+      it = e
 
   ###
   Interaction
@@ -88,17 +93,15 @@ class TreeView extends View
 
     @confirm()
 
-  scrollTo: (dom)->
-    scroller = @offsetParent()
-    top = dom.position().top
-    bot = scroller.height() - top - dom.outerHeight()
-    amount = 0
-    if bot < 0
-      amount -= bot
-      top -= amount
-    if top < 0
-      amount += top
-    scroller.scrollTop scroller.scrollTop() + amount
+  scrollTo: (item)->
+    top = item.position().top
+    bot = top + item.outerHeight()
+
+    p = @offsetParent()
+    if bot > p.scrollBottom()
+      p.scrollBottom bot
+    if top < p.scrollTop()
+      p.scrollTop top
 
   moveLeft: ->
     return unless @selected

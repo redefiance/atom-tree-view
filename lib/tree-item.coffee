@@ -7,12 +7,12 @@ class TreeItem extends View
     @li class: 'entry list-item', =>
       @div outlet: 'header', class: 'header list-item'
 
-  initialize: (content, icon)->
-    if typeof(content) is 'object'
-      @header.append content
+  initialize: (@id, iconOrDOM)->
+    if typeof(iconOrDOM) is 'object'
+      @header.append idOrDOM
     else
-      label = $$ -> @span content
-      label.addClass 'icon '+icon if icon
+      label = $$ -> @span id
+      label.addClass 'icon '+iconOrDOM if iconOrDOM
       @header.append label
     @events = new Emitter
 
@@ -51,16 +51,24 @@ class TreeItem extends View
 
   addItem: (item)->
     unless @list?
-      @append (@list = $$ -> @ol class: 'list-tree')
+      @list = $$ -> @ol class: 'list-tree'
+      @list.items = {}
+      @append @list
       @removeClass 'list-item'
       @addClass 'list-nested-item'
       @addClass 'collapsed' unless @isExpanded()
+    @list.items[item.id] = item
     @list.append item
-    item.onRemove => if @subItems().length == 0
-      @list.remove()
-      @list = undefined
-      @removeClass 'list-nested-item'
-      @addClass 'list-item'
+    item.onRemove =>
+      delete @list.items[item.id]
+      if @subItems().length == 0
+        @list.remove()
+        @list = undefined
+        @removeClass 'list-nested-item'
+        @addClass 'list-item'
+
+  getItem: (id)->
+    @list?.items[id]
 
   ###
   Expansion state

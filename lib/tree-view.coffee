@@ -45,11 +45,12 @@ class TreeView extends View
     @select()
 
   getItem: (idOrPath)->
-    if typeof(id) is string
-      return @items[id]
-    it = @
-    it = it?.getItem id for id in idOrPath
-    it
+    if typeof(idOrPath) is 'array'
+      it = @
+      it = it?.getItem id for id in idOrPath
+      it
+    else
+      @items[idOrPath]
 
   createItems: (path, creator)->
     it = @

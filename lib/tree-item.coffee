@@ -9,7 +9,7 @@ class TreeItem extends View
 
   initialize: (@id, iconOrDOM)->
     if typeof(iconOrDOM) is 'object'
-      @header.append idOrDOM
+      @header.append iconOrDOM
     else
       label = $$ -> @span id
       label.addClass 'icon '+iconOrDOM if iconOrDOM

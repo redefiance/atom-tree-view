@@ -22,9 +22,9 @@ class TreeView extends View
       'core:move-up':    => @moveUp()
       'core:page-down':  => @pageDown()
       'core:page-up':    => @pageUp()
-      'core:confirm':    => @confirm()
-      'tree-view:collapse-directory': => @collapse()
-      'tree-view:expand-directory':   => @expand()
+      'tree-view:open-selected-entry': => @confirm()
+      'tree-view:collapse-directory':  => @collapse()
+      'tree-view:expand-directory':    => @expand()
 
     @on 'click', '.entry', (e)=> @clickedOnEntry(e)
 
@@ -152,10 +152,15 @@ class TreeView extends View
   clickedOnEntry: (e)->
     e.stopImmediatePropagation()
     item = $(e.currentTarget).view()
-    return @select item unless item is @selected
+    itemcontent = item.header.children ':first'
+    if e.pageX < itemcontent.offset().left # clicked the left handle
+      item.toggleExpansion()
+      @select item
+      return
 
-    handleClicked = e.pageX - item.header.position().left <= 15
-    return item.toggleExpansion() if handleClicked
+    unless item is @selected
+      @select item
+      return
 
     @confirm()
 
